@@ -1,68 +1,85 @@
 package upvotes;
 
 import java.io.*;
-import java.util.Arrays;
 
 public class Solution {
-  
-  public static int[][] getSeqs(int length, int[] input) {
+
+  public static int[][] getNonDecSeq(int length, int[] input) {
     int[][] output = new int[2][];
-    int[] nonDec = new int[length];
-    int[] nonInc = new int[length];
-    Arrays.fill(nonDec, -1);
-    Arrays.fill(nonInc, -1);
-    
-    int nonDecPrev = input[0];
-    int nonDecStartingIndex = 0;
-    int nonDecPrevIndex = 0;
-    int nonDecJ = 0;
-    int nonIncPrev = input[0];
-    int nonIncStartingIndex = 0;
-    int nonIncPrevIndex = 0;
-    int nonIncJ = 0;
+    int[] starts = new int[length];
+    int[] ends = new int[length];
+    for(int i = 0; i < length; i++) {
+      starts[i] = -1;
+      ends[i] = -1;
+    }
+
+    int prev = input[0];
+    int startingIndex = 0;
+    int prevIndex = 0;
     for(int i = 1; i < length; i++) {
-      if(input[i] < nonDecPrev) {
-        int endIndex = nonDecPrevIndex;
-        if(endIndex != nonDecStartingIndex) {
-          nonDec[nonDecJ] = nonDecStartingIndex;
-          nonDecJ ++ ;
-          nonDec[nonDecJ] = endIndex;
-          nonDecJ ++ ;
+      if(input[i] < prev) {
+        starts[i] = -1;
+        int endIndex = prevIndex;
+        if(endIndex != startingIndex) {
+          starts[startingIndex] = startingIndex;
+          ends[startingIndex] = endIndex;
         }
-        nonDecStartingIndex = i;
+        startingIndex = i;
+      } else {
+        starts[i] = startingIndex;
       }
-      nonDecPrevIndex = i;
-      nonDecPrev = input[i];
-      
-      if(input[i] > nonIncPrev) {
-        int endIndex = nonIncPrevIndex;
-        if(endIndex != nonIncStartingIndex) {
-          nonInc[nonIncJ] = nonIncStartingIndex;
-          nonIncJ ++ ;
-          nonInc[nonIncJ] = endIndex;
-          nonIncJ ++ ;
-        }
-        nonIncStartingIndex = i;
-      }
-      nonIncPrevIndex = i;
-      nonIncPrev = input[i];
+      prevIndex = i;
+      prev = input[i];
     }
-    if(nonDecStartingIndex != length - 1) {
-      nonDec[nonDecJ] = nonDecStartingIndex;
-      nonDecJ ++ ;
-      nonDec[nonDecJ] = length - 1;
-    }
-    if(nonIncStartingIndex != length - 1) {
-      nonInc[nonIncJ] = nonIncStartingIndex;
-      nonIncJ ++ ;
-      nonInc[nonIncJ] = length - 1;
+    if(startingIndex != length - 1) {
+      starts[startingIndex] = startingIndex;
+      ends[startingIndex] = length - 1;
     }
     
-    output[0] = nonDec;
-    output[1] = nonInc;
+    output[0] = starts;
+    output[1] = ends;
+
     return output;
   }
-  
+
+  public static int[][] getNonIncSeq(int length, int[] input) {
+    int[][] output = new int[2][];
+    int[] starts = new int[length];
+    int[] ends = new int[length];
+    for(int i = 0; i < length; i++) {
+      starts[i] = -1;
+      ends[i] = -1;
+    }
+
+    int prev = input[0];
+    int startingIndex = 0;
+    int prevIndex = 0;
+    for(int i = 1; i < length; i++) {
+      if(input[i] > prev) {
+        starts[i] = -1;
+        int endIndex = prevIndex;
+        if(endIndex != startingIndex) {
+          starts[startingIndex] = startingIndex;
+          ends[startingIndex] = endIndex;
+        }
+        startingIndex = i;
+      } else {
+        starts[i] = startingIndex;
+      }
+      prevIndex = i;
+      prev = input[i];
+    }
+    if(startingIndex != length - 1) {
+      starts[startingIndex] = startingIndex;
+      ends[startingIndex] = length - 1;
+    }
+    
+    output[0] = starts;
+    output[1] = ends;
+
+    return output;
+  }
+
   public static int getNumSubranges(int start, int end) {
     // 1 + .... + end - start
     int n = end - start;
@@ -88,70 +105,92 @@ public class Solution {
     for(int i = 0; i < numDays; i++)
       upvotes[i] = Integer.parseInt(tokens[i]);
     // End of processing input
-    
-    // Array with alternating start-end index of sequences
-    int[][] temp = getSeqs(numDays, upvotes);
-    int[] nonDec = temp[0];
-    int[] nonInc = temp[1];
+
+    // Array filled with starting index of sequence if sequence exists
+    int[][] temp = getNonDecSeq(numDays, upvotes);
+    int[] nonDecStarts = temp[0];
+    int[] nonDecEnds = temp[1];
+    temp = getNonIncSeq(numDays, upvotes);
+    int[] nonIncStarts = temp[0];
+    int[] nonIncEnds = temp[1];
 
     /*
     for(int i = 0; i < numDays; i++) {
-      System.out.print(nonDec[i] + " ");
+      System.out.print(nonDecStarts[i] + " ");
     }
     System.out.println();
     
     for(int i = 0; i < numDays; i++) {
-      System.out.print(nonInc[i] + " ");
+      System.out.print(nonDecEnds[i] + " ");
     }
     System.out.println();
-    */
-    int nonDecStart = 0;
-    int nonIncStart = 0;
+
+    for(int i = 0; i < numDays; i++) {
+      System.out.print(nonIncStarts[i] + " ");
+    }
+    System.out.println();
     
-    for(int i = 0 ; i < numDays - window + 1; i++) {
+    for(int i = 0; i < numDays; i++) {
+      System.out.print(nonIncEnds[i] + " ");
+    }
+    System.out.println();
+    System.out.println();
+    */
+
+    // Compute value for first window
+    int prevNonDec = 0;
+    int prevTemp = nonDecStarts[0];
+    for(int i = 1; i < window; i ++) {
+      int currTemp = nonDecStarts[i];
+      if(prevTemp != -1 && prevTemp == currTemp)
+        prevNonDec += i - prevTemp;
+      prevTemp = currTemp;
+    }
+    
+    
+    int prevNonInc = 0;
+    prevTemp = nonIncStarts[0];
+    for(int i = 1; i < window; i ++) {
+      int currTemp = nonIncStarts[i];
+      if(prevTemp != -1 && prevTemp == currTemp)
+        prevNonInc += i - prevTemp;
+      prevTemp = currTemp;
+    }
+    
+    int prevNonDecStart = nonDecStarts[0];
+    int prevNonDecEnd = nonDecStarts[window - 1];
+    int prevNonIncStart = nonIncStarts[0];
+    int prevNonIncEnd  = nonIncStarts[window - 1];
+    
+    // window moving from left to right
+    for(int i = 1 ; i < numDays - window + 1; i++) {
       int wStart = i;
       int wEnd = i + window - 1;
-      // Get number of nonDec subranges
-      int numNonDec = 0;
-      int j = nonDecStart;
-      while(true) {
-        if(j == numDays || nonDec[j] == -1)
-          break;
-        int rStart = nonDec[j];
-        int rEnd = nonDec[j + 1];
-        if(rEnd > wStart && rStart < wEnd) {
-          int start = Math.max(wStart, rStart);
-          int end = Math.min(wEnd, rEnd);
-          numNonDec += getNumSubranges(start, end);
-        } else if(rStart > wEnd) {
-          break;
-        } else if(wStart > rEnd) {
-          nonDecStart = j + 2;
-        }
-        j += 2;
-      }
-      // Get number of nonInc subranges
-      int numNonInc = 0;
-      j = nonIncStart;
-      while(true) {
-        if(j == numDays || nonInc[j] == -1)
-          break;
-        int rStart = nonInc[j];
-        int rEnd = nonInc[j + 1];
-        if(rEnd > wStart && rStart < wEnd) {
-          int start = Math.max(wStart, rStart);
-          int end = Math.min(wEnd, rEnd);
-          numNonInc += getNumSubranges(start, end);
-        } else if(rStart > wEnd) {
-          break;
-        } else if(wStart > rEnd) {
-          nonIncStart = j + 2;
-        }   
-        j += 2;
-      }
-      //System.out.println(numNonDec + "," + numNonInc);
-      System.out.println(numNonDec - numNonInc);
+      int currNonDecStart = nonDecStarts[wStart];
+      int currNonDecEnd = nonDecStarts[wEnd];
+      int currNonIncStart = nonIncStarts[wStart];
+      int currNonIncEnd = nonIncStarts[wEnd];
+      //System.out.println(prevNonDec + "," + prevNonInc);
+      System.out.println(prevNonDec - prevNonInc);
+      // Reduce number of nonDecs 
+      if(currNonDecStart == prevNonDecStart && currNonDecStart != -1)
+        prevNonDec -= Math.min(wEnd - 1, nonDecEnds[currNonDecStart]) - wStart + 1;
+      // Increase number of nonDecs
+      if(currNonDecEnd == prevNonDecEnd && currNonDecEnd != -1)
+        prevNonDec += wEnd - Math.max(wStart, currNonDecEnd);
+      // Reduce number of nonIncs
+      if(currNonIncStart == prevNonIncStart && currNonIncStart != -1)
+        prevNonInc -= Math.min(wEnd - 1, nonIncEnds[currNonIncStart]) - wStart + 1;
+      // Increase number of nonIncs
+      if(currNonIncEnd == prevNonIncEnd && currNonIncEnd != -1)
+        prevNonInc += wEnd - Math.max(wStart, currNonIncEnd);
+        
+      prevNonDecStart = currNonDecStart;
+      prevNonDecEnd = currNonDecEnd;
+      prevNonIncStart = currNonIncStart;
+      prevNonIncEnd = currNonIncEnd;
     }
+    //System.out.println(prevNonDec + "," + prevNonInc);
+    System.out.println(prevNonDec - prevNonInc);
   }
-
 }
