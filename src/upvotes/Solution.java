@@ -87,7 +87,7 @@ public class Solution {
   }
 
   public static void main(String args[] ) throws Exception {
-    StringBufferInputStream s = new StringBufferInputStream("10 3\n1 2 3 1 1 1 2 3 1 1");
+    StringBufferInputStream s = new StringBufferInputStream("11 10\n1 2 1 2 1 2 1 2 1 2 1");
     System.setIn(s);
 
     BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -138,7 +138,7 @@ public class Solution {
     */
 
     // Compute value for first window
-    int prevNonDec = 0;
+    long prevNonDec = 0l;
     int prevTemp = nonDecStarts[0];
     for(int i = 1; i < window; i ++) {
       int currTemp = nonDecStarts[i];
@@ -148,7 +148,7 @@ public class Solution {
     }
     
     
-    int prevNonInc = 0;
+    long prevNonInc = 0l;
     prevTemp = nonIncStarts[0];
     for(int i = 1; i < window; i ++) {
       int currTemp = nonIncStarts[i];
